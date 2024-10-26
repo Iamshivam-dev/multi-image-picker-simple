@@ -1,5 +1,7 @@
 # multi-image-picker-simple
-> Very simple lightweight multiple image picker using vanilla js, highly customizable
+> Very ***simple, lightweight, customizable*** multiple image picker using vanilla js
+
+![text](preview.png)
 
 
 I tried a lot of multiple image pickers but they are very heavy in size and contains a lot of features which are not even needed. I made this simple image picker so that for simple forms it can be used
