@@ -48,3 +48,7 @@ multiImagePickerSimple({inputId: "imageInput", ...otherOptions})
 If you are interested feel free to contribute to this project
 
 Happy coding  :D
+
+> What's New v 1.0.1
+
+Added Support for non image files, now its `multi-file-picker-simple` :)
