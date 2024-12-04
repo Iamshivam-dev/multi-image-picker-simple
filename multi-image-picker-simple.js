@@ -84,7 +84,8 @@ function multiImagePickerSimple(options) {
         containerClass: 'upload-file-container',
         uploadFileBtnClass: 'upload-file-btn',
         imageContainerClass: 'uploaded-image',
-        removeBtnClass: 'remove-btn'
+        removeBtnClass: 'remove-btn',
+        existingFiles: []
     }
     if (typeof options == "string") {
         let temp = options
@@ -93,6 +94,13 @@ function multiImagePickerSimple(options) {
 
     options = { ...defaultOptions, ...options }
     const imageInput = document.getElementById(options.inputId);
+
+    let deletedFilesInput = null;
+    if(options.existingFiles?.length > 0){
+        imageInput.parentElement.insertAdjacentHTML('afterbegin', `<input type="hidden" name="deleted_files" value="">`)
+        deletedFilesInput = document.querySelector("[name=deleted_files")
+
+    }
 
     imageInput.parentElement.insertAdjacentHTML('beforeend', `
         <label class="${options.uploadFileBtnClass}" for="${options.inputId}">${options.addBtnText}</label>
@@ -105,19 +113,44 @@ function multiImagePickerSimple(options) {
     if (options.debug) {
         globalThis.dataTransfer = dataTransfer;
     }
-    removeImageFromMultiPic = function (uniqueId, dtIndex) {
+    removeImageFromMultiPic = function (uniqueId, dtIndex, realId = null) { // if realId is defined, then its an existing file
         document.getElementById(uniqueId).remove()
+        if(realId) {
+            console.log({realId})
+            let values = deletedFilesInput.value
+            values = values.length > 0 ? values.split(','): []
+            values.push(realId)
+            deletedFilesInput.value = values.join(',')
+        }else{
+            dataTransfer.items.remove(dtIndex)
+            imageInput.files = dataTransfer.files
 
-        dataTransfer.items.remove(dtIndex)
-        imageInput.files = dataTransfer.files
-
-        // update indexes on btns
-        Array.from(document.querySelectorAll("[data-dtIndex]")).forEach(each => {
-            each.dataset.dtIndex = parseInt(each.dataset.dtIndex) - 1
-        })
+            // update indexes on btns
+            Array.from(document.querySelectorAll("[data-dtIndex]")).forEach(each => {
+                each.dataset.dtIndex = parseInt(each.dataset.dtIndex) - 1
+            })
+        }
     }
     imageInput.style.visibility = 'hidden'
     imageInput.style.position = "absolute"
+    if(options.existingFiles?.length > 0){
+        options.existingFiles.forEach(file => {
+            const uniqueId = (Math.random() + 1).toString(36).substring(7);
+            const img = `
+            <div class="${options.imageContainerClass}" id="${uniqueId}">
+                <button class="${options.removeBtnClass}" data-dtIndex="${dataTransfer.items.length - 1}" onclick="removeImageFromMultiPic('${uniqueId}', this.dataset.dtIndex, '${file.id}')">X</button>
+            </div>
+            `;
+            container.insertAdjacentHTML('beforeend', img);
+            if(file.media_type == "image"){
+                document.getElementById(uniqueId).insertAdjacentHTML('afterbegin', `<img src="${file.url}"/>`)
+            }else{
+                document.getElementById(uniqueId).insertAdjacentHTML('afterbegin', svgDocument( trimFileName(file.original_name)))
+            }
+
+
+        })
+    }
     imageInput.onchange = function (event) {
         if (event.target.files?.length > 0) {
             Array.from(event.target.files).forEach(eachFile => {
