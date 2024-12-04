@@ -1,3 +1,6 @@
+# Base Library
+> This is pretyt much starter version of the library, use this version for a very simple, and more customizable file picker.
+
 # multi-image-picker-simple
 > Very ***simple, lightweight, customizable*** multiple image picker using vanilla js
 
